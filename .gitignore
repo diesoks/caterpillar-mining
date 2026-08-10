@@ -1,0 +1,15 @@
+# Secrets - never commit real credentials/keys. Each subproject already ignores its own
+# build output and IDE files (caterpillar-mining-backend/.gitignore,
+# caterpillar-mining-frontend/.gitignore); this file only covers monorepo-root-level concerns.
+.env
+.env.local
+.env.*.local
+
+# IDE, in case the monorepo root itself is opened as a project (not just the subfolders).
+.idea/
+*.iml
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db

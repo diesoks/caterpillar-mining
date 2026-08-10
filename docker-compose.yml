@@ -1,0 +1,44 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: caterpillar-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: caterpillar-db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      # Host port 3307 -> container's 3306, so MySQL Workbench (running on Windows, outside
+      # Docker) can connect. Using 3307 (not 3306) avoids clashing with the local MySQL server
+      # already running on the host, which is a completely separate database/dataset from this
+      # dockerized one.
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./caterpillar-mining-backend
+    container_name: caterpillar-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MINING_ENCRYPTION_KEY: ${MINING_ENCRYPTION_KEY}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  apache:
+    build:
+      context: ./caterpillar-mining-frontend
+    container_name: caterpillar-apache
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
