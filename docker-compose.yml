@@ -27,6 +27,13 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MINING_ENCRYPTION_KEY: ${MINING_ENCRYPTION_KEY}
+    ports:
+      # Exposes the backend directly on the host so Swagger UI / OpenAPI docs are reachable at
+      # http://localhost:8080 for local debugging - Apache's httpd.conf only proxies "/api/",
+      # not "/swagger-ui/" or "/v3/api-docs/", so those paths are otherwise unreachable through
+      # Apache's port 8081. The React app still only ever talks to the API through Apache/8081;
+      # this is purely a developer convenience, not something the frontend depends on.
+      - "8080:8080"
     depends_on:
       mysql:
         condition: service_healthy
